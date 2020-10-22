@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="shift.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <title>勤務シフト</title>
+</head>
+
+<body>
+    <section><input id="year" type="number" value="2020" min="2020" max="2022" step="1" required>年<input id="month"
+            type="number" value="1" min="1" max="12" step="1" required>月のシフトを<input class="button" id="start"
+            type="submit" value="作成"><input class="button" id="reset" type="submit" value="リセット"><input class="button"
+            id="autoSet" type="submit" value="休日自動設定">
+        <table id="matrix"></table>
+    </section>
+    <script>
+        var staff = ["寺澤", "宇都宮", "寺井", "山下"];
+        var now = new Date();
+        var year = now.getFullYear();
+        var month = now.getMonth();
+        var today = now.getDay();
+        var dayStr = 1;
+        var dayOfWeekStr = ["日", "月", "火", "水", "木", "金", "土", "日", "月", "火", "水", "木", "金", "土"];
+        var endMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        var date = new Date(year, month - 1, dayStr);
+        var dayOfWeek = date.getDay();
+        var days = endMonth[month];
+        var myMonth = $('#month').val();
+        var date = new Date(year, myMonth - 1, dayStr);
+        var dayOfWeek = date.getDay();
+        var allDays = [];
+        var randDays = [];
+
+        //月を指定し日数マトリックスを表示
+        $(function () {
+            $('#start').on('click', function () {
+
+                if ($('#year').val() == '') {
+                    alert('年が指定されていません');
+                    return false;
+
+                }
+
+                if ($('#month').val() == '') {
+                    alert('月が指定されていません');
+                    return false;
+
+                } else if ($('#month').val() > 12 || $('#month').val() < 1) {
+                    alert('入力が誤っています');
+                    return false;
+
+                } else {
+
+                    $('#matrix').empty();
+
+                    var myYear = $('#year').val();
+                    var myMonth = $('#month').val();
+                    var date = new Date(myYear, myMonth - 1, dayStr);
+                    var dayOfWeek = date.getDay();
+                    var days = endMonth[myMonth - 1];
+
+                    $('#matrix').append('<tr class = "days"><td class="dayOfWeek">' + year + "." + myMonth + '</td></tr>');
+                    $('#matrix').append('<tr class = "weeks"><td class="weekOfWeek">' + "名前" + '</td></tr>');
+
+                    for (var i = 1, j = 0; i <= days, j < days; i++, j++) {
+                        var weekNumber = dayOfWeekStr[dayOfWeek + (j % 7)];
+                        $('.days').append('<td class= "day' + i + '">' + i + ' </td>');
+                        $('.weeks').append('<td class= "week' + i + '"> ' + weekNumber + ' </td > ');
+                        if (weekNumber.indexOf("日") != -1) {
+                            $('.week' + i).css("color", "red");
+                        } else if (weekNumber.indexOf("土") != -1) {
+                            $('.week' + i).css("color", "blue");
+                        }
+                    }
+
+                    for (var i = 0; i < staff.length; i++) {
+                        $('#matrix').append('<tr id = "staff' + i + '" class = "staff' + i + '"><td>' + staff[i] + '</td></tr>');
+                        for (var j = 1; j <= days; j++) {
+                            $('#staff' + i).append('<td class= "day nbrHoliday' + i + ' autoSetDay' + j + '" id= "day' + j + '"> </td>');
+                        } $('#staff' + i).append('<td class= "nbrHolidays' + i + '"></td>');
+                    }
+
+                    $('#matrix').append('<tr class = "holiday"><td>' + "休日者数" + '</td></tr>');
+                    for (var i = 1; i <= days; i++) {
+                        $('.holiday').append('<td class= "holiday' + i + '"> </td>');
+                    }
+                    $('.days').append('<td class = "nbrHolidays" rowspan="2">' + "休日数" + '</td>');
+
+                    for (var i = 1; i <= days; i++) {
+                        var cntHoliday = $('#day' + i + '.addHoliday').length;
+                        $('td.holiday' + i + '').html(cntHoliday);
+                    }
+
+                    cntStaffHolidays();
+
+                    $(function () {
+                        $('.day').on('click', dayClick)
+                    });
+                }
+            });
+        });
+
+        $(function () {
+            $('#matrix').append('<tr class = "days"><td class="dayOfWeek">' + year + "." + (month + 1) + '</td></tr>');
+            $('#matrix').append('<tr class = "weeks"><td class="weekOfWeek">' + "名前" + '</td></tr>');
+
+            for (var i = 1, j = 0; i <= days, j < days; i++, j++) {
+                var weekNumber = dayOfWeekStr[dayOfWeek + (j % 7)];
+                $('.days').append('<td class= "day' + i + '">' + i + ' </td>');
+                $('.weeks').append('<td class= "week' + i + '"> ' + weekNumber + ' </td > ');
+                if (weekNumber.indexOf("日") != -1) {
+                    $('.week' + i).css("color", "red");
+                } else if (weekNumber.indexOf("土") != -1) {
+                    $('.week' + i).css("color", "blue");
+                }
+            }
+
+            for (var i = 0; i < staff.length; i++) {
+                $('#matrix').append('<tr id = "staff' + i + '" class = "staff' + i + '"><td>' + staff[i] + '</td></tr>');
+                for (var j = 1; j <= days; j++) {
+                    $('#staff' + i).append('<td class= "day nbrHoliday' + i + ' autoSetDay' + j + '" id= "day' + j + '"> </td>');
+                } $('#staff' + i).append('<td class= "nbrHolidays' + i + '"></td>');
+            }
+
+            $('#matrix').append('<tr class = "holiday"><td>' + "休日者数" + '</td></tr>');
+            for (var i = 1; i <= days; i++) {
+                $('.holiday').append('<td class= "holiday' + i + '"> </td>');
+            }
+            $('.days').append('<td class = "nbrHolidays" rowspan="2">' + "休日数" + '</td>');
+
+            for (var i = 1; i <= days; i++) {
+                var cntHoliday = $('#day' + i + '.addHoliday').length;
+                $('td.holiday' + i + '').html(cntHoliday);
+            }
+
+            cntStaffHolidays();
+
+            $(function () {
+                $('.day').on('click', dayClick)
+            });
+        });
+
+        function setDays() {
+            for (var i = 1, j = 0; i <= days, j < days; i++, j++) {
+                var weekNumber = dayOfWeekStr[dayOfWeek + (j % 7)];
+                $('.days').append('<td class= "day' + i + '">' + i + ' </td>');
+                $('.weeks').append('<td class= "week' + i + '"> ' + weekNumber + ' </td > ');
+                if (weekNumber.indexOf("日") != -1) {
+                    $('.week' + i).css("color", "red");
+                } else if (weekNumber.indexOf("土") != -1) {
+                    $('.week' + i).css("color", "blue");
+                }
+            }
+        }
+
+        // 日にち表示
+
+        function setStaffDays() {
+            for (var i = 0; i < staff.length; i++) {
+                $('#matrix').append('<tr id = "staff' + i + '" class = "staff' + i + '"><td>' + staff[i] + '</td></tr>');
+                for (var j = 1; j <= days; j++) {
+                    $('#staff' + i).append('<td class= "day nbrHoliday' + i + ' autoSetDay' + j + '" id= "day' + j + '"> </td>');
+                } $('#staff' + i).append('<td class= "nbrHolidays' + i + '"></td>');
+            }
+        }
+        // 休日者数・休日数表示項目作成
+        function setHoliday() {
+            $('#matrix').append('<tr class = "holiday"><td>' + "休日者数" + '</td></tr>');
+            for (var i = 1; i <= days; i++) {
+                $('.holiday').append('<td class= "holiday' + i + '"> </td>');
+            }
+            $('.days').append('<td class = "nbrHolidays" rowspan="2">' + "休日数" + '</td>');
+        }
+
+        // スタッフの休日数をカウント
+        function cntStaffHolidays() {
+            for (var j = 0; j < staff.length; j++) {
+                var cntStaffHoliday = $('.nbrHoliday' + j + '.addHoliday').length;
+                $('td.nbrHolidays' + j + '').html(cntStaffHoliday);
+            }
+        }
+        // 日毎の休日者数をカウント
+        function cntHoliday() {
+            for (var i = 1; i <= days; i++) {
+                var cntHoliday = $('#day' + i + '.addHoliday').length;
+                $('td.holiday' + i + '').html(cntHoliday);
+            }
+        }
+
+        // 日にちをクリック、休み・勤務時間区分表示
+        function dayClick() {
+            if ($(this).hasClass('addHoliday') === false) {
+                if ($(this).hasClass('addA') === false) {
+                    if ($(this).hasClass('addB') === false) {
+                        $(this).addClass('addHoliday').text("◯");
+                    } else {
+                        $(this).removeClass('addB').empty()
+                    }
+                } else {
+                    $(this).removeClass('addA').empty().addClass('addB').text("B");
+                }
+            } else {
+                $(this).removeClass('addHoliday').empty().addClass('addA').text("A");
+            }
+            $(function () {
+                cntHoliday();
+                cntStaffHolidays();
+            })
+        }
+
+        //リセットボタン
+        $(function resetClick() {
+            $('#reset').on('click', function () {
+                $('.day').removeClass('addHoliday addA addB').empty();
+                cntStaffHolidays();
+                cntHoliday();
+            })
+        });
+
+        // ランダムに休日設定
+        $(function () {
+            $('#autoSet').on('click', function () {
+
+                // 休日を空にする
+                $('.day').removeClass('addHoliday addA addB').empty();
+                randDays.length = 0;
+                allDays.length = 0;
+
+                var myMonth = $('#month').val();
+                var days = endMonth[myMonth - 1];
+                var rand;
+
+
+                for (s = 0; s < staff.length; s++) {
+
+
+                    // 月の日数を配列に入れる
+                    for (var i = 1; i <= days; i++) {
+                        allDays.push([i]);
+                    }
+
+                    // 月の配列からランダムに10日取り出す
+                    for (i = 0, l = allDays.length; i < 10; i++, l--) {
+                        rand = Math.floor(Math.random() * l);
+                        randDays.push(allDays.splice(rand, 1)[0]);
+                    }
+
+                    // ランダムに取り出した10日を休日に変える
+                    for (i = 0; i < randDays.length; i++) {
+                        $('.nbrHoliday' + s + '.autoSetDay' + randDays[i]).addClass('addHoliday').text("◯");
+
+                    }
+
+                    randDays.length = 0;
+                    allDays.length = 0;
+
+                }
+
+                cntHoliday();
+                cntStaffHolidays();
+
+            })
+        });
+    </script>
+</body>
+
+</html>
