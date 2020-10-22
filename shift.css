@@ -1,0 +1,77 @@
+table{
+    border: solid 3px;
+    border-collapse:separate;
+    margin: 0 auto;
+    font-size:15px;
+    border-color: #FFFFFF;
+    table-layout: fixed;
+    width: 100%;
+}
+
+td {
+    width:15px;
+    border: solid 1px #dfdede;
+    padding: 10px 10px;
+    text-align: center;
+    border-radius: 5px;
+    box-shadow: 2px 2px 2px gray;
+}
+
+td.dayOfWeek,td.weekOfWeek{
+    width:100px;
+}
+
+.days,.weeks{
+    background-color: #abf6f8;
+}
+
+.holiday{
+        background-color:#a09c9c;
+        border: solid 3px;
+    }
+
+.addHoliday{
+    background-color:rgb(248, 153, 153);
+    }
+    
+
+.delHoliday{
+    background-color: #FFFFFF;
+    }
+
+.addA{
+    background-color: rgb(205, 236, 158);
+}
+
+.addB{
+    background-color: rgb(247, 193, 235);
+}
+
+.day:hover{
+    background-color : rgb(219, 241, 248);
+}
+
+td.nbrHolidays{
+    background-color: rgb(203, 213, 216);
+}
+
+#month{
+    font-size:20px;
+    margin: 5px;
+    width:40px;
+}
+#year{
+    font-size:20px;
+    margin: 5px;
+    width:80px;
+}
+
+.button{
+    font-size: 15px;;
+    margin:5px;
+    width:80px;
+}
+
+#autoSet{
+    width:150px;
+}
